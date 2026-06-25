@@ -1498,6 +1498,26 @@ impl PaneRuntime {
 
     pub fn apply_host_terminal_theme(&self, theme: crate::terminal_theme::TerminalTheme) {
         self.terminal.apply_host_terminal_theme(theme);
+        self.notify_color_scheme_change(theme);
+    }
+
+    /// When the active theme changes, applications that subscribed via DEC mode
+    /// 2031 (`CSI ? 2031 h`) expect an unsolicited `CSI ? 997 ; n` report so they
+    /// can re-detect light/dark without restarting. Inject it into the child's
+    /// input stream, mirroring what a native terminal emulator does.
+    fn notify_color_scheme_change(&self, theme: crate::terminal_theme::TerminalTheme) {
+        if !self.terminal.color_scheme_report_enabled() {
+            return;
+        }
+        let Some(report) = theme.color_scheme_report_sequence() else {
+            return;
+        };
+        if let Err(err) = self.try_send_bytes(Bytes::from_static(report)) {
+            tracing::debug!(
+                pane_id = ?self.pane_id,
+                "failed to deliver color-scheme change report to pane: {err}"
+            );
+        }
     }
 
     pub fn spawn(
@@ -2715,6 +2735,68 @@ impl PaneRuntime {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn light_theme() -> crate::terminal_theme::TerminalTheme {
+        crate::terminal_theme::TerminalTheme {
+            foreground: Some(crate::terminal_theme::RgbColor {
+                r: 0x4c,
+                g: 0x4f,
+                b: 0x69,
+            }),
+            background: Some(crate::terminal_theme::RgbColor {
+                r: 0xef,
+                g: 0xf1,
+                b: 0xf5,
+            }),
+        }
+    }
+
+    fn dark_theme() -> crate::terminal_theme::TerminalTheme {
+        crate::terminal_theme::TerminalTheme {
+            foreground: Some(crate::terminal_theme::RgbColor {
+                r: 0xca,
+                g: 0xd3,
+                b: 0xf5,
+            }),
+            background: Some(crate::terminal_theme::RgbColor {
+                r: 0x24,
+                g: 0x27,
+                b: 0x3a,
+            }),
+        }
+    }
+
+    #[tokio::test]
+    async fn theme_change_emits_color_scheme_report_when_mode_2031_enabled() {
+        // Child enabled DEC mode 2031 (CSI ? 2031 h).
+        let (runtime, mut rx) =
+            PaneRuntime::test_with_channel_and_scrollback_bytes(80, 24, 4096, b"\x1b[?2031h", 8);
+
+        runtime.apply_host_terminal_theme(light_theme());
+        assert_eq!(
+            rx.try_recv().expect("expected report").as_ref(),
+            b"\x1b[?997;2n"
+        );
+
+        runtime.apply_host_terminal_theme(dark_theme());
+        assert_eq!(
+            rx.try_recv().expect("expected report").as_ref(),
+            b"\x1b[?997;1n"
+        );
+    }
+
+    #[tokio::test]
+    async fn theme_change_is_silent_when_mode_2031_disabled() {
+        // No mode 2031: the child never asked for notifications.
+        let (runtime, mut rx) =
+            PaneRuntime::test_with_channel_and_scrollback_bytes(80, 24, 4096, b"", 8);
+
+        runtime.apply_host_terminal_theme(light_theme());
+        assert!(
+            rx.try_recv().is_err(),
+            "should not push a report unsolicited"
+        );
+    }
 
     #[test]
     fn shutdown_liveness_treats_reaped_direct_child_as_gone() {

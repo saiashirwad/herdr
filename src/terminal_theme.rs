@@ -22,6 +22,18 @@ impl RgbColor {
     }
 }
 
+impl HostAppearance {
+    /// The DEC private mode 2031 color-scheme report a terminal sends to an
+    /// application that has subscribed via `CSI ? 2031 h`. Apps use this to
+    /// re-detect light/dark live when the surrounding theme changes.
+    pub fn color_scheme_report_sequence(self) -> &'static [u8] {
+        match self {
+            HostAppearance::Dark => b"\x1b[?997;1n",
+            HostAppearance::Light => b"\x1b[?997;2n",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct TerminalTheme {
     pub foreground: Option<RgbColor>,
@@ -49,6 +61,16 @@ impl TerminalTheme {
 
     pub fn is_empty(self) -> bool {
         self.foreground.is_none() && self.background.is_none()
+    }
+
+    /// The DEC mode 2031 color-scheme report bytes implied by this theme's
+    /// background, or `None` when the background is unknown.
+    pub fn color_scheme_report_sequence(self) -> Option<&'static [u8]> {
+        Some(
+            self.background?
+                .inferred_appearance()
+                .color_scheme_report_sequence(),
+        )
     }
 }
 
@@ -167,6 +189,43 @@ mod tests {
         assert_eq!(
             osc_reset_default_color_sequence(DefaultColorKind::Background),
             "\x1b]111\x1b\\"
+        );
+    }
+
+    #[test]
+    fn color_scheme_report_sequence_follows_background_luminance() {
+        let dark = TerminalTheme::default().with_color(
+            DefaultColorKind::Background,
+            RgbColor {
+                r: 0x24,
+                g: 0x27,
+                b: 0x3a,
+            },
+        );
+        assert_eq!(
+            dark.color_scheme_report_sequence(),
+            Some(&b"\x1b[?997;1n"[..])
+        );
+
+        let light = TerminalTheme::default().with_color(
+            DefaultColorKind::Background,
+            RgbColor {
+                r: 0xef,
+                g: 0xf1,
+                b: 0xf5,
+            },
+        );
+        assert_eq!(
+            light.color_scheme_report_sequence(),
+            Some(&b"\x1b[?997;2n"[..])
+        );
+    }
+
+    #[test]
+    fn color_scheme_report_sequence_is_none_without_background() {
+        assert_eq!(
+            TerminalTheme::default().color_scheme_report_sequence(),
+            None
         );
     }
 

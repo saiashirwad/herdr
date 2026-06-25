@@ -275,6 +275,12 @@ impl PaneTerminal {
         self.ghostty.apply_host_terminal_theme(theme);
     }
 
+    /// Whether the child has enabled DEC mode 2031 and therefore wants live
+    /// `CSI ? 997 ; n` color-scheme change notifications.
+    pub fn color_scheme_report_enabled(&self) -> bool {
+        self.ghostty.color_scheme_report_enabled()
+    }
+
     pub fn has_transient_default_color_override(&self) -> bool {
         self.ghostty.has_transient_default_color_override()
     }
@@ -437,6 +443,20 @@ impl GhosttyPaneTerminal {
         self.core
             .lock()
             .map(|core| core.transient_default_color_owner_pgid.is_some())
+            .unwrap_or(false)
+    }
+
+    /// Whether the child currently has DEC mode 2031 (color-scheme reporting)
+    /// enabled, as tracked by the underlying terminal emulator.
+    pub fn color_scheme_report_enabled(&self) -> bool {
+        self.core
+            .lock()
+            .ok()
+            .and_then(|core| {
+                core.terminal
+                    .mode_get(crate::ghostty::MODE_COLOR_SCHEME_REPORT)
+                    .ok()
+            })
             .unwrap_or(false)
     }
 

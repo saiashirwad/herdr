@@ -166,6 +166,9 @@ pub const MODE_GRAPHEME_CLUSTER: u16 = 2027;
 // but the generated bindings do not currently expose named constants for them.
 const TERMINAL_DATA_COLOR_FOREGROUND: ffi::GhosttyTerminalData = 18;
 const TERMINAL_DATA_COLOR_CURSOR: ffi::GhosttyTerminalData = 20;
+/// DEC private mode 2031: when set by the child, the application wants to be
+/// notified (`CSI ? 997 ; n`) whenever the terminal's color scheme changes.
+pub const MODE_COLOR_SCHEME_REPORT: u16 = 2031;
 
 const KITTY_IMAGE_STORAGE_LIMIT_BYTES: u64 = 64 * 1024 * 1024;
 const APC_MAX_BYTES: usize = 16 * 1024 * 1024;
