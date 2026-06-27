@@ -143,11 +143,11 @@ impl Palette {
             accent: Color::Rgb(47, 129, 247), // accent.fg
             panel_bg: Color::Rgb(1, 4, 9),    // canvas.inset
             surface0: Color::Rgb(33, 38, 45),
-            surface1: Color::Rgb(48, 54, 61), // border.default
+            surface1: Color::Rgb(48, 54, 61),    // border.default
             surface_dim: Color::Rgb(13, 17, 23), // canvas.default
             overlay0: Color::Rgb(110, 118, 129),
             overlay1: Color::Rgb(139, 148, 158),
-            text: Color::Rgb(230, 237, 243), // fg.default
+            text: Color::Rgb(230, 237, 243),     // fg.default
             subtext0: Color::Rgb(125, 133, 144), // fg.muted
             mauve: Color::Rgb(163, 113, 247),
             green: Color::Rgb(63, 185, 80),
@@ -162,14 +162,14 @@ impl Palette {
     /// GitHub Light — Primer light default palette.
     pub fn github_light() -> Self {
         Self {
-            accent: Color::Rgb(9, 105, 218), // accent.fg
+            accent: Color::Rgb(9, 105, 218),     // accent.fg
             panel_bg: Color::Rgb(246, 248, 250), // canvas.subtle
             surface0: Color::Rgb(234, 238, 242),
             surface1: Color::Rgb(208, 215, 222), // border.default
             surface_dim: Color::Rgb(255, 255, 255), // canvas.default
             overlay0: Color::Rgb(175, 184, 193),
             overlay1: Color::Rgb(140, 149, 159),
-            text: Color::Rgb(31, 35, 40), // fg.default
+            text: Color::Rgb(31, 35, 40),        // fg.default
             subtext0: Color::Rgb(101, 109, 118), // fg.muted
             mauve: Color::Rgb(130, 80, 223),
             green: Color::Rgb(26, 127, 55),
