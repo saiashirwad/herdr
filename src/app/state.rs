@@ -137,6 +137,50 @@ impl Palette {
         }
     }
 
+    /// GitHub Dark — Primer dark default palette.
+    pub fn github() -> Self {
+        Self {
+            accent: Color::Rgb(47, 129, 247), // accent.fg
+            panel_bg: Color::Rgb(1, 4, 9),    // canvas.inset
+            surface0: Color::Rgb(33, 38, 45),
+            surface1: Color::Rgb(48, 54, 61), // border.default
+            surface_dim: Color::Rgb(13, 17, 23), // canvas.default
+            overlay0: Color::Rgb(110, 118, 129),
+            overlay1: Color::Rgb(139, 148, 158),
+            text: Color::Rgb(230, 237, 243), // fg.default
+            subtext0: Color::Rgb(125, 133, 144), // fg.muted
+            mauve: Color::Rgb(163, 113, 247),
+            green: Color::Rgb(63, 185, 80),
+            yellow: Color::Rgb(210, 153, 34),
+            red: Color::Rgb(248, 81, 73),
+            blue: Color::Rgb(88, 166, 255),
+            teal: Color::Rgb(57, 197, 207),
+            peach: Color::Rgb(240, 136, 62),
+        }
+    }
+
+    /// GitHub Light — Primer light default palette.
+    pub fn github_light() -> Self {
+        Self {
+            accent: Color::Rgb(9, 105, 218), // accent.fg
+            panel_bg: Color::Rgb(246, 248, 250), // canvas.subtle
+            surface0: Color::Rgb(234, 238, 242),
+            surface1: Color::Rgb(208, 215, 222), // border.default
+            surface_dim: Color::Rgb(255, 255, 255), // canvas.default
+            overlay0: Color::Rgb(175, 184, 193),
+            overlay1: Color::Rgb(140, 149, 159),
+            text: Color::Rgb(31, 35, 40), // fg.default
+            subtext0: Color::Rgb(101, 109, 118), // fg.muted
+            mauve: Color::Rgb(130, 80, 223),
+            green: Color::Rgb(26, 127, 55),
+            yellow: Color::Rgb(154, 103, 0),
+            red: Color::Rgb(207, 34, 46),
+            blue: Color::Rgb(9, 105, 218),
+            teal: Color::Rgb(27, 124, 131),
+            peach: Color::Rgb(188, 76, 0),
+        }
+    }
+
     /// Terminal 16-color theme.
     pub fn terminal() -> Self {
         Self {
@@ -494,6 +538,8 @@ impl Palette {
         match name.to_lowercase().replace([' ', '_'], "-").as_str() {
             "catppuccin" | "catppuccin-mocha" => Some(Self::catppuccin()),
             "catppuccin-latte" | "latte" | "light" => Some(Self::catppuccin_latte()),
+            "github" | "github-dark" => Some(Self::github()),
+            "github-light" => Some(Self::github_light()),
             "terminal" => Some(Self::terminal()),
             "tokyo-night" | "tokyonight" => Some(Self::tokyo_night()),
             "tokyo-night-day" | "tokyo-day" | "tokyonight-day" => Some(Self::tokyo_night_day()),
@@ -935,6 +981,8 @@ impl ExperimentSetting {
 pub const THEME_NAMES: &[&str] = &[
     "catppuccin",
     "catppuccin-latte",
+    "github",
+    "github-light",
     "terminal",
     "tokyo-night",
     "tokyo-night-day",
